@@ -1,5 +1,5 @@
 library(tidyverse)
-load("projects/murders/rda/murders.rda")
+
 
 murders %>% mutate(abb = reorder(abb, rate)) %>%
             ggplot(aes(abb, rate)) +
