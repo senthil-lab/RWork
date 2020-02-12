@@ -17,3 +17,18 @@ install_course_zip("C:/Users/snara016/Downloads/14_310x_Intro_to_R.zip",multi=FA
 # | -- Typing bye() causes swirl to exit. Your progress will be saved.
 # | -- Typing main() returns you to swirl's main menu.
 # | -- Typing info() displays these options again.
+
+library(tidyverse)
+papers <- as_tibble(read_csv("CitesforSara.csv"))
+names(papers)
+papers_select <- select(papers, journal, year, cites, title, au1)
+nrow(filter(papers_select, cites >= 100))
+papers_select %>% group_by(journal) %>% summarize(sum(cites))
+
+length(unique(papers_select$au1))
+
+papers_female <- select(papers, contains("female"))
+head(papers_female)
+
+
+install.packages("tidyverse")
