@@ -4,18 +4,89 @@ library(caret)
 library(dslabs)
 library(dplyr)
 library(purrr)
+
+x1 <- rbinom(500000000,2,1/2)
+head(x1,20)
+mean(x1)
+
+x2 <- rbinom(500000000,2,1/2)
+x3 <- rbinom(500000000,2,1/2)
+
+y1 <- x1 - x3
+
+y2 <- x2 - x3
+
+cov(y1,y2)
+
+z1 <- ifelse(y1==0,1,0)
+var(z1)
+mean(z1) * (1 - mean(z1))
+
+z2 <- ifelse(y2==0,1,0)
+var(z2)
+
+
+x1 <- runif(1000000,0,1)
+x1
+
+x2 <- runif(1000000,0,2)
+x2
+
+z <- ifelse(x1<x2,x2,x1)
+
+z
+
+mean(z<0)
+mean(z>2)
+
+
+mean( (z >= 1) & (z <= 2))
+
+mean( (z >= 0) & (z <= 1))
+
+p = ecdf(z)
+
+plot(z)
+
+p(1.25)
+
+1.5/2
+
+1/8
+
+p(0.0)
+
+plot(p)
+
+cov(z1,z2)
+
+
+head(y1)
+head(z1)
+
+
+
 data("heights")
 
-set.seed(2)
+set.seed(2, sample.kind = "Rounding")
 y <- heights$sex
+x <- heights$height
+
+
+set.seed(2, sample.kind = "Rounding")
 testIndex <- createDataPartition(y, times = 1, p = 0.5, list = FALSE)
+nrow(testIndex)
+
+testIndex
+
 # half # from males and half # from females
 sum(y[testIndex] == "Male")
 sum(y == "Male")
 sum(y[testIndex] == "Female")
 sum(y == "Female")
-trainSet <- heights[-testIndex,]
+
 testSet <- heights[testIndex,]
+trainSet <- heights[-testIndex,]
 
 # Method 1 - Simple - Guessing ML algorithm : Sampling
 
@@ -23,6 +94,8 @@ yHat <- sample(c("Male","Female"), length(testIndex), replace = TRUE) %>%
         factor(levels = levels(testSet$sex))
 
 mean(yHat == testSet$sex)
+
+testSet[which(y[testIndex] == "Male")]
 
 
 # on average, males are slightly taller than females.
@@ -51,14 +124,25 @@ perf <- sapply(cutoff, function(x) {
 })
 
 data.frame(cutoff,perf) %>% ggplot(aes(cutoff,perf)) + geom_line()
+max(perf)
+
 cutoff[which.max(perf)]
 
 
-yHatNew <- ifelse(testSet$height> 64, "Male", "Female") %>% factor(levels = levels(testSet$sex))
+yHatNew <- ifelse(testSet$height> 65, "Male", "Female") %>% factor(levels = levels(testSet$sex))
+
+mean(y == yHatNew)
+
+library(dslabs)
+y <- read_mnist()
+
+str(y$train$images)
+
+factor(y$train$labels)
+
 
 
 table(pred = yHatNew, actu = testSet$sex)
-
 
 testSet %>% mutate(y_hat = yHatNew) %>% group_by(sex) %>% summarize(mean(sex == y_hat))
 
@@ -236,11 +320,14 @@ length(y[which(x == "inclass")])
 
 sum(y[which(x == "inclass")] == "Female")/length(y[which(x == "inclass")])
 
+mean(y[which(x == "inclass")] == "Female")
+
 
 mean(y[which(x == "online")] == "Female")
 
 
 yHatNew <- ifelse(x == "online", "Male", "Female") %>% factor(levels = levels(y))
+
 
 mean(yHatNew == y)
 
@@ -250,7 +337,7 @@ head(data.frame(yHatNew, y))
 table(predicted = y_hat, actual = y)
 
 
-table(yHatNew,y)
+table(yHatNew, y)
 
 
 sensitivity(data = yHatNew, reference = y)
@@ -294,3 +381,111 @@ mutate(g = cut(x, quantile(x, ps), include.lowest = TRUE)) %>%
   group_by(g) %>%
   summarize(y = mean(y), x = mean(x)) %>%
   qplot(x, y, data =.)
+
+3*30*12
+
+
+
+
+exp <- rexp(100000000,1/5)
+
+poi <-rpois(100000000,3*30*12)
+
+mean(poi>=1100 & poi<=1200)
+
+80/243
+
+1/(5+3)
+
+0.125 * 30 * 3
+
+poi1 <-sapply(c(1:10000),sum(rpois(,3)))
+
+sum(poi1)
+
+callsPerYear <- poi*30*12
+
+mean(callsPerYear<=1120)
+
+
+hist(poi,breaks = 1000)
+
+
+exp <- sapply(poi,function(x)rexp(x,1/5))
+
+
+mean(poi)
+mean(exp)
+
+var(poi)
+var(exp)
+
+minPerDay <- exp * poi
+
+9*24
+
+var(minPerDay)
+
+minPerMon <- exp * poi * 30
+
+var(minPerDay) * 30 * 30
+
+15*30
+
+
+
+
+library(dslabs)
+data("heights")
+y <- heights$height
+
+library(dplyr)
+library(caret)
+set.seed(2) #if you are using R 3.5 or earlier
+
+set.seed(2, sample.kind = "Rounding") #if you are using R 3.6 or later
+
+test_index <- createDataPartition(y, times = 1, p = 0.5, list = FALSE)
+train_set <- heights %>% slice(-test_index)
+test_set <- heights %>% slice(test_index)
+
+train_set %>% 
+  filter(round(height)==66) %>%
+  summarize(y_hat = mean(sex=="Female"))
+
+heights %>% 
+  mutate(x = round(height)) %>%
+  group_by(x) %>%
+  filter(n() >= 10) %>%
+  summarize(prop = mean(sex == "Female")) %>%
+  ggplot(aes(x, prop)) +
+  geom_point()
+
+
+
+heights %>% 
+  mutate(x = round(height)) %>%
+  group_by(x) %>%
+  filter(n() >= 10 & x == 66) %>%
+  summarize(prop = mean(sex == "Female"))
+
+
+lm_fit <- mutate(train_set, y = as.numeric(sex == "Female")) %>% lm(y ~ height, data = .)
+p_hat <- predict(lm_fit, test_set)
+y_hat <- ifelse(p_hat > 0.5, "Female", "Male") %>% factor()
+confusionMatrix(y_hat, test_set$sex)$overall["Accuracy"]
+
+
+
+max(p_hat)
+min(p_hat)
+
+log(p_hat/(1-max(p_hat)))
+
+glm_fit <- mutate(train_set, y = as.numeric(sex == "Female")) %>% 
+            glm(y ~ height, data = ., family = "binomial")
+p_hat <- predict(glm_fit, test_set, type = "response")
+y_hat <- ifelse(p_hat > 0.5, "Female", "Male") %>% factor()
+confusionMatrix(y_hat, test_set$sex)$overall["Accuracy"]
+
+
